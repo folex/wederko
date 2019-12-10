@@ -15,7 +15,7 @@ class QuillComponent extends React.Component {
     constructor(props) {
         super()
         this.quillRef = React.createRef()
-        this.state = { text: '', room: 'folex-quill-default', ydoc: null, binding: null, provider: null }
+        this.state = { text: '', room: 'folex-quill', ydoc: null, binding: null, provider: null }
         this.handleChange = this.handleChange.bind(this)
     }
 
