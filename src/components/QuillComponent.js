@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import '../css/monokai-sublime.min.css'
 import 'react-quill/dist/quill.snow.css'
 
@@ -14,16 +15,12 @@ class QuillComponent extends React.Component {
     constructor(props) {
         super()
         this.quillRef = React.createRef()
-        this.state = { text: '' }
+        this.state = { text: '', room: 'folex-quill-default', ydoc: null, binding: null, provider: null }
         this.handleChange = this.handleChange.bind(this)
     }
 
-    handleChange(value) {
-        this.setState({ text: value })
-    }
-
     render() {
-        let quill = <ReactQuill
+        return (<ReactQuill
             ref={this.quillRef}
             value={this.state.text}
             onChange={this.handleChange}
@@ -41,23 +38,80 @@ class QuillComponent extends React.Component {
                     }
                 }
             }
-        />
-
-        return quill
+        />)
     }
 
     componentDidMount() {
+        this.addRoomInput() // TODO: should this happen in render?
+        this.connect(this.state.room)
+
+        this.quillRef.current.focus()
+    }
+
+    disconnect() {
+        if (this.state.ydoc != null) {
+            this.state.ydoc.destroy()
+        }
+    }
+
+    connect(room) {
+        this.disconnect()
+
         let quill = this.quillRef.current
+        let editor = quill.getEditor()
 
-        var editor = quill.getEditor()
+        let ydoc = new Y.Doc()
+        let provider = new WebrtcProvider(room, ydoc)
+        let type = ydoc.getText('quill')
+        let binding = new QuillBinding(type, editor, provider.awareness)
 
-        const ydoc = new Y.Doc()
-        const provider = new WebrtcProvider('folex-quill', ydoc)
-        const type = ydoc.getText('quill')
+        this.setState({ room: room, ydoc: ydoc, binding: binding, provider: provider })
+    }
 
-        this.binding = new QuillBinding(type, editor, provider.awareness)
+    changeRoom() {
+        let input = document.getElementById("room-input")
+        let room = input.value
 
-        quill.focus()
+        this.connect(room)
+    }
+
+    handleChange(value) {
+        this.setState({ text: value })
+    }
+
+    handleRoomInput() {
+        let input = document.getElementById("room-input")
+        let room = input.value
+        let roomButton = document.getElementById("room-button")
+        // Enable button if room value isn't empty and differs from the current one
+        roomButton.disabled = room === "" || room === this.state.room
+    }
+
+    addRoomInput() {
+        let toolbar = document.querySelector(".ql-toolbar")
+        
+        let inputSpan = document.createElement("span")
+        inputSpan.className = "ql-formats"
+        let input = document.createElement("input")
+        input.type = "text"
+        input.className = "ql-image"
+        input.id = "room-input"
+        input.value = this.state.room
+        input.oninput = (e) => this.handleRoomInput()
+        inputSpan.appendChild(input)
+
+        let buttonSpan = document.createElement("span")
+        buttonSpan.className = "ql-formats"
+        let button = document.createElement("button")
+        button.type = "button"
+        button.disabled = true
+        button.innerHTML = "Change room"
+        button.id = "room-button"
+        button.onclick = (e) => this.changeRoom()
+        buttonSpan.appendChild(button)
+
+        toolbar.appendChild(inputSpan)
+        toolbar.appendChild(buttonSpan)
     }
 }
 
