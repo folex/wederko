@@ -1,26 +1,22 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import './css/monokai-sublime.min.css'
+import 'react-quill/dist/quill.snow.css'
+import QuillComponent from './components/QuillComponent.js';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  return new QuillComponent()
+}
+
+function handleSubmit(event) {
+  console.log('handleSubmit ')
+  console.dir(event)
+}
+
+function handleChange(event) {
+  console.log('handleChange ')
+  console.dir(event)
+  console.dir(event.currentTarget)
 }
 
 export default App;
